@@ -51,6 +51,42 @@ app.get('/orders', function(req, res) {
       }
     )
   })
+
+app.get('/top_products', function(req, res) {
+    connection.query(
+      'SELECT a1_electronicshop.* , sum(quantity) as quantity_sum FROM a1_electronicshop,a1_order WHERE a1_order.pid = a1_electronicshop.pid GROUP BY a1_order.pid ORDER BY quantity_sum desc;',
+      function(err, results) {
+        console.log(results) //แสดงผลที่ console
+        res.json(results) //ตอบกลับ request
+      }
+    )
+})
+
+
+app.get('/top_customers', function(req, res) {
+  connection.query(
+    'SELECT a1_customer.*, sum(quantity*price) as price_sum FROM a1_customer,a1_order,a1_electronicshop WHERE a1_order.cid = a1_customer.cid AND a1_order.pid = a1_electronicshop.pid GROUP BY a1_order.cid ORDER BY price_sum DESC;',
+    function(err, results) {
+      console.log(results) //แสดงผลที่ console
+      res.json(results) //ตอบกลับ request
+    }
+  )
+})
+
+
+app.post('/orders', function(req, res) {
+  const values = req.body
+  console.log(values)
+  connection.query(
+    'INSERT INTO a1_order (oid, pid, cid, quantity) VALUES ?', [values],
+    function(err, results) {
+      console.log(results) //แสดงผลที่ console
+      res.json(results) //ตอบกลับ request
+    }
+  )
+})
+
+  
 // app.get('/pets', function(req, res) {
 //     connection.query(
 //       'SELECT pet.id,pet.petName,user.fullname as owner FROM pet LEFT JOIN user ON pet.userId = user.id;',
@@ -74,7 +110,10 @@ app.get('/orders', function(req, res) {
 //       }
 //     )
 //   })
-  
+
+
+
+
 
 app.listen(5000, () => {
   console.log('Server is started.')
